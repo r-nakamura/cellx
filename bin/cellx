@@ -29,9 +29,10 @@ import cellx
 
 def usage():
     die("""\
-usage: {} [-v] [-c #] [-M class] [-F rate] [-L rate] [-A alpha] [-m #] [file...]
+usage: {} [-v] [-c #] [-d wxh] [-M class] [-F rate] [-L rate] [-A alpha] [-m #] [file...]
   -v        verbose mode
   -c #      select color scheme
+  -d wxh    window size
   -M class  monitor class (Null/SDL/SDL_Filter/PostScript) (default: SDL)
   -F rate   the number of frames per animation/fading
   -L rate   limit the frame rate (default: infinity)
@@ -40,17 +41,21 @@ usage: {} [-v] [-c #] [-M class] [-F rate] [-L rate] [-A alpha] [-m #] [file...]
 """.format(sys.argv[0]))
 
 def main():
-    opt = getopts('c:M:F:L:A:m:') or usage()
+    opt = getopts('c:d:M:F:L:A:m:') or usage()
     color_scheme = int(opt.c) if opt.c else 0
+    width, height = 800, 600
+    if opt.d:
+        d = opt.d.split('x')
+        width, height = int(d[0]), int(d[1])
     monitor_class = opt.M if opt.M else 'SDL'
     frame_rate = float(opt.F) if opt.F else 30
     rate_limit = float(opt.L) if opt.L else None
     alpha = int(opt.A) if opt.A else 64
 
     cls = eval('cellx.monitor.' + monitor_class)
-    mon = cls(color_scheme=color_scheme, alpha=alpha)
+    mon = cls(width=width, height=height, color_scheme=color_scheme, alpha=alpha)
 
-    cel = cellx.Cell(monitor=mon, frame_rate=frame_rate, rate_limit=rate_limit)
+    cel = cellx.Cell(width=width, height=height, monitor=mon, frame_rate=frame_rate, rate_limit=rate_limit)
 
     parser = cellx.Parser(cell=cel)
 
